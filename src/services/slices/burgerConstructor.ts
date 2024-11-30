@@ -17,6 +17,7 @@ interface ConstructorState {
   orderModalData: TOrder | null;
   errorMessage: string | null;
 }
+
 // Начальное состояние
 const initialState: ConstructorState = {
   isLoading: false,

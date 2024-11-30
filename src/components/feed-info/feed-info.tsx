@@ -1,28 +1,41 @@
 import { FC } from 'react';
-
-import { TOrder } from '@utils-types';
+import { useSelector } from '../../services/store';
 import { FeedInfoUI } from '../ui/feed-info';
+import { TOrder } from '@utils-types';
+import { createSelector } from '@reduxjs/toolkit';
 
-const getOrders = (orders: TOrder[], status: string): number[] =>
-  orders
-    .filter((item) => item.status === status)
-    .map((item) => item.number)
-    .slice(0, 20);
+// Селекторы для данных из стора
+const selectFeedState = (state: any) => state.feeds;
 
+// Селектор для получения заказов по статусу
+const selectOrdersByStatus = createSelector(
+  [(state: any) => state.feeds.orders, (_: any, status: string) => status],
+  (orders: TOrder[], status: string) =>
+    orders
+      .filter((order: TOrder) => order.status === status)
+      .map((order: TOrder) => order.number)
+      .slice(0, 20)
+);
+
+// Основной компонент
 export const FeedInfo: FC = () => {
-  /** TODO: взять переменные из стора */
-  const orders: TOrder[] = [];
-  const feed = {};
+  // Получение состояния фида
+  const { orders, total, totalToday } = useSelector(selectFeedState);
 
-  const readyOrders = getOrders(orders, 'done');
+  // Получение заказов по статусу
+  const readyOrders = useSelector((state) =>
+    selectOrdersByStatus(state, 'done')
+  );
+  const pendingOrders = useSelector((state) =>
+    selectOrdersByStatus(state, 'pending')
+  );
 
-  const pendingOrders = getOrders(orders, 'pending');
-
+  // Отображение данных
   return (
     <FeedInfoUI
       readyOrders={readyOrders}
       pendingOrders={pendingOrders}
-      feed={feed}
+      feed={{ total, totalToday }}
     />
   );
 };

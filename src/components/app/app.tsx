@@ -16,11 +16,24 @@ import styles from './app.module.css';
 import { useDispatch } from '../../services/store';
 import { useEffect } from 'react';
 import { AppHeader, OrderInfo, Modal, IngredientDetails } from '@components';
+import { fetchIngredients } from '../../services/slices/ingredients';
+import { fetchFeeds } from '../../services/slices/feed';
 
 const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const background = location.state?.background;
+
+  const dispatch = useDispatch();
+
+  // Используем useEffect для запуска запросов
+  useEffect(() => {
+    // Загрузка ингредиентов
+    dispatch(fetchIngredients());
+
+    // Загрузка фида
+    dispatch(fetchFeeds());
+  }, [dispatch]);
 
   return (
     <div className={styles.app}>

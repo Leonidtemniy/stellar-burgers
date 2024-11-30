@@ -1,32 +1,47 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router';
+import React, { FC } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { isAuthorizedSelector, getRequestUser } from '@slices';
 import { Preloader } from '@ui';
 
-type ProtectedRouteProps = {
-  onlyUnAuth?: boolean;
-  children: React.ReactElement;
-};
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  publicRoute?: boolean; // Публичный маршрут
+  onlyUnAuth?: boolean; // Доступно только для неавторизованных
+}
 
-export const ProtectedRoute = ({
-  onlyUnAuth,
-  children
-}: ProtectedRouteProps) => (
-  //   const location = useLocation();
-  //   //const { getIsAuthChecked, getUser } = useSelector;
-  //   //   const user = useSelector(getUser);
-  //   //   const isAuthChecked = useSelector(getIsAuthChecked);
-  //   if (!isAuthChecked) {
-  //     // пока идёт чекаут пользователя, показываем прелоадер
-  <Preloader />
-);
-//   }
-//   if (!onlyUnAuth && !user) {
-//     // если пользователь на странице авторизации и данных в хранилище нет, то делаем редирект
-//     return <Navigate replace to='/login' />;
-//   }
-//   if (onlyUnAuth && user) {
-//     // если пользователь на странице авторизации и данные есть в хранилище
-//     return <Navigate replace to='/list' />;
-//   }
-//   return children;
+export const ProtectedRoute: FC<ProtectedRouteProps> = ({
+  children,
+  publicRoute,
+  onlyUnAuth
+}) => {
+  const isAuthorized = useSelector(isAuthorizedSelector); // Получаем статус авторизации
+  const isUserLoading = useSelector(getRequestUser); // Состояние загрузки пользователя
+  const location = useLocation();
+
+  // Если данные пользователя ещё загружаются, отображаем прелоадер
+  if (isUserLoading) {
+    return <Preloader />;
+  }
+
+  // Если это публичный маршрут и пользователь авторизован
+  if (publicRoute) {
+    if (isAuthorized) {
+      const from = location.state?.from || { pathname: '/' };
+      return <Navigate replace to={from} />;
+    }
+    return <>{children}</>;
+  }
+
+  // Если маршрут доступен только для неавторизованных пользователей
+  if (onlyUnAuth && isAuthorized) {
+    return <Navigate to={location.state?.from?.pathname || '/'} />;
+  }
+
+  // Для защищённых маршрутов
+  if (!isAuthorized && !onlyUnAuth) {
+    return <Navigate to='/login' state={{ from: location }} />;
+  }
+
+  return <>{children}</>;
+};
