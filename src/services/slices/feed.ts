@@ -69,7 +69,7 @@ export const selectTotalToday = (state: { feeds: FeedState }) =>
   state.feeds.totalToday;
 export const selectErrorMessage = (state: { feeds: FeedState }) =>
   state.feeds.errorMessage;
-export const selectIsLoading = (state: { feeds: FeedState }) =>
+export const selectFeedIsLoading = (state: { feeds: FeedState }) =>
   state.feeds.isLoading;
 
 // Экспорт редюсера

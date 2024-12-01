@@ -18,7 +18,7 @@ export const OrderInfo: FC = () => {
     errorMessage
   } = useSelector(selectOrderState);
   const ingredients: TIngredient[] = useSelector(
-    (state) => state.ingredient.ingredientsData
+    (state) => state.ingredients.ingredients
   );
 
   // Загружаем данные заказа

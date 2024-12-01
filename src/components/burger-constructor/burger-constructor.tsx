@@ -24,7 +24,7 @@ export const BurgerConstructor: FC = () => {
   const ingredients = useMemo(() => {
     const bun = constructorItems.bun?._id;
     const ingredientIds = constructorItems.ingredients.map(
-      (ingredient) => ingredient._id
+      (ingredient: { _id: any }) => ingredient._id
     );
     return bun ? [bun, ...ingredientIds, bun] : ingredientIds;
   }, [constructorItems]);

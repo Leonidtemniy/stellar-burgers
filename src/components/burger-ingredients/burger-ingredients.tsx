@@ -7,7 +7,7 @@ import { BurgerIngredientsUI } from '../ui/burger-ingredients';
 
 export const BurgerIngredients: FC = () => {
   // Получаем данные из Redux
-  const ingredients = useSelector((state) => state.ingredient.ingredientsData);
+  const ingredients = useSelector((state) => state.ingredients.ingredients);
 
   // Проверяем, что ingredients существуют перед фильтрацией
   const buns =

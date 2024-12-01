@@ -15,8 +15,8 @@ import '../../index.css';
 import styles from './app.module.css';
 import { useDispatch } from '../../services/store';
 import { useEffect } from 'react';
-import { AppHeader, OrderInfo, Modal, IngredientDetails } from '@components';
-import { fetchIngredients } from '../../services/slices/ingredients';
+import { AppHeader, OrderInfo, Modal, IngredientsDetails } from '@components';
+import { getIngredientsList } from '../../services/slices/ingredients'; // Используем getIngredientsList
 import { fetchFeeds } from '../../services/slices/feed';
 
 const App = () => {
@@ -29,7 +29,7 @@ const App = () => {
   // Используем useEffect для запуска запросов
   useEffect(() => {
     // Загрузка ингредиентов
-    dispatch(fetchIngredients());
+    dispatch(getIngredientsList()); // Исправлено на getIngredientsList
 
     // Загрузка фида
     dispatch(fetchFeeds());
@@ -44,7 +44,7 @@ const App = () => {
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
-        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route path='/ingredients/:id' element={<IngredientsDetails />} />
         <Route path='*' element={<NotFound404 />} />
         {/*Защищенные маршруты*/}
         <Route
@@ -103,7 +103,7 @@ const App = () => {
             path='/ingredients/:id'
             element={
               <Modal title='Детали ингредиента' onClose={() => navigate(-1)}>
-                <IngredientDetails />
+                <IngredientsDetails />
               </Modal>
             }
           />

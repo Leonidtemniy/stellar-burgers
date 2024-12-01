@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getOrderByNumberApi, getOrdersApi } from '../../utils/burger-api';
+import { getOrdersApi, getOrderByNumberApi } from '../../utils/burger-api';
 import { TOrder } from '@utils-types';
 
 // Тип состояния
@@ -19,20 +19,38 @@ const initialState: OrderState = {
 };
 
 // Асинхронные экшены
+export const fetchOrders = createAsyncThunk('order/fetchOrders', async () => {
+  const orders = await getOrdersApi(); // Возвращается массив заказов
+  return orders;
+});
+
 export const fetchOneOrder = createAsyncThunk(
   'order/fetchOneOrder',
   async (orderNumber: number) => {
-    const response = await getOrderByNumberApi(orderNumber);
+    const response = await getOrderByNumberApi(orderNumber); // Возвращается объект с массивом orders
     return response.orders[0];
   }
 );
 
+// Slice
 const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(fetchOrders.pending, (state) => {
+        state.isLoading = true;
+        state.errorMessage = null;
+      })
+      .addCase(fetchOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orderList = action.payload;
+      })
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errorMessage = action.error.message || 'Ошибка загрузки заказов';
+      })
       .addCase(fetchOneOrder.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = null;
