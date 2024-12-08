@@ -29,7 +29,7 @@ const App = () => {
   // Используем useEffect для запуска запросов
   useEffect(() => {
     // Загрузка ингредиентов
-    dispatch(getIngredientsList()); // Исправлено на getIngredientsList
+    dispatch(getIngredientsList());
 
     // Загрузка фида
     dispatch(fetchFeeds());
@@ -82,9 +82,9 @@ const App = () => {
         <Route
           path='/profile'
           element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <Profile />
+            // </ProtectedRoute>
           }
         />
         <Route
@@ -136,3 +136,6 @@ const App = () => {
 };
 
 export default App;
+function apiGetUser(): any {
+  throw new Error('Function not implemented.');
+}

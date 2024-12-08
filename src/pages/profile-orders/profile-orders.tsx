@@ -12,7 +12,7 @@ export const ProfileOrders: FC = () => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
-  if (isLoading) return <div>Загрузка...</div>;
+  // if (isLoading) return <div>Загрузка...</div>;
   if (errorMessage) return <div>Ошибка: {errorMessage}</div>;
 
   return <ProfileOrdersUI orders={orderList} />;

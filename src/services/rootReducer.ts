@@ -7,7 +7,7 @@ import userReducer from '../services/slices/user';
 
 const rootReducer = combineReducers({
   burgerConstructor: burgerConstructorReducer,
-  feed: feedReducer,
+  feeds: feedReducer,
   ingredients: ingredientReducer,
   order: orderSlice,
   user: userReducer

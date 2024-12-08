@@ -3,12 +3,22 @@ import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
 const URL = process.env.BURGER_API_URL;
 
-const checkResponse = <T>(res: Response): Promise<T> =>
-  res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
+// const checkResponse = <T>(res: Response): Promise<T> =>
+//   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
 
 type TServerResponse<T> = {
   success: boolean;
 } & T;
+
+const checkResponse = <T>(res: Response): Promise<T> => {
+  console.log('Raw response status:', res.status);
+  return res.ok
+    ? res.json()
+    : res.json().then((err) => {
+        console.error('Error details from server:', err); // Логи ошибок сервера
+        return Promise.reject(err);
+      });
+};
 
 type TRefreshResponse = TServerResponse<{
   refreshToken: string;
@@ -143,19 +153,38 @@ type TAuthResponse = TServerResponse<{
   user: TUser;
 }>;
 
-export const registerUserApi = (data: TRegisterData) =>
-  fetch(`${URL}/auth/register`, {
+// export const registerUserApi = (data: TRegisterData) =>
+//   fetch(`${URL}/auth/register`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json;charset=utf-8'
+//     },
+//     body: JSON.stringify(data)
+//   })
+//     .then((res) => checkResponse<TAuthResponse>(res))
+//     .then((data) => {
+//       if (data?.success) return data;
+//       return Promise.reject(data);
+//     });
+export const registerUserApi = (data: TRegisterData) => {
+  console.log('API URL:', `${URL}/auth/register`);
+  return fetch(`${URL}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
     },
     body: JSON.stringify(data)
   })
-    .then((res) => checkResponse<TAuthResponse>(res))
+    .then((res) => {
+      console.log('Raw response from server:', res); // Проверяем статус ответа
+      return checkResponse<TAuthResponse>(res);
+    })
     .then((data) => {
+      console.log('Parsed response data:', data); // Проверяем, что приходит в ответе
       if (data?.success) return data;
       return Promise.reject(data);
     });
+};
 
 export type TLoginData = {
   email: string;

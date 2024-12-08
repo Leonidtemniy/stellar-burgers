@@ -58,7 +58,13 @@ export const updateUserThunk = createAsyncThunk(
   (user: Partial<TRegisterData>) => updateUserApi(user)
 );
 
-export const getUserThunk = createAsyncThunk('user/get', getUserApi);
+//export const getUserThunk = createAsyncThunk('user/get', getUserApi);
+export const getUserThunk = createAsyncThunk('user/get', async () => {
+  console.log('Fetching user data...');
+  const response = await getUserApi();
+  console.log('User data received:', response);
+  return response;
+});
 
 const userSlice = createSlice({
   name: 'user',
@@ -163,3 +169,18 @@ export const getRequestUser = (state: { user: UserState }) => state.user.user;
 export const getUserSelector = (state: { user: UserState }) => state.user.user;
 
 export default userSlice.reducer;
+function apiCallToRegister(userData: {
+  email: string;
+  name: string;
+  password: string;
+}) {
+  throw new Error('Function not implemented.');
+}
+
+function registerSuccess(response: void): any {
+  throw new Error('Function not implemented.');
+}
+
+function registerFailure(message: any): any {
+  throw new Error('Function not implemented.');
+}

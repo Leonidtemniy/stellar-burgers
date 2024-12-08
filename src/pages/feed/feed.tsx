@@ -5,11 +5,11 @@ import { FC } from 'react';
 import { useSelector } from '../../services/store';
 
 export const Feed: FC = () => {
-  const orders: TOrder[] = useSelector((state) => state.feed.orders);
+  const orders: TOrder[] = useSelector((state) => state.feeds.orders);
 
   if (!orders.length) {
     return <Preloader />;
   }
 
-  <FeedUI orders={orders} handleGetFeeds={() => {}} />;
+  return <FeedUI orders={orders} handleGetFeeds={() => {}} />;
 };
