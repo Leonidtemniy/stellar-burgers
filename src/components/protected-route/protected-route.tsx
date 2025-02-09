@@ -19,6 +19,9 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   const isUserLoading = useSelector(getRequestUser); // Состояние загрузки пользователя
   const location = useLocation();
 
+  console.log('Is authorized:', isAuthorized);
+  console.log('Is user loading:', isUserLoading);
+
   // Если данные пользователя ещё загружаются, отображаем прелоадер
   if (isUserLoading) {
     return <Preloader />;

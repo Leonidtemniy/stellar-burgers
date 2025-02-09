@@ -16,7 +16,7 @@ import styles from './app.module.css';
 import { useDispatch } from '../../services/store';
 import { useEffect } from 'react';
 import { AppHeader, OrderInfo, Modal, IngredientsDetails } from '@components';
-import { getIngredientsList } from '../../services/slices/ingredients'; // Используем getIngredientsList
+import { getIngredientsList } from '../../services/slices/ingredients';
 import { fetchFeeds } from '../../services/slices/feed';
 
 const App = () => {
@@ -82,9 +82,9 @@ const App = () => {
         <Route
           path='/profile'
           element={
-            // <ProtectedRoute>
-            <Profile />
-            // </ProtectedRoute>
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           }
         />
         <Route

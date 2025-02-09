@@ -2,7 +2,9 @@ import { FC } from 'react';
 import { useSelector } from '../../services/store';
 import { FeedInfoUI } from '../ui/feed-info';
 import { TOrder } from '@utils-types';
-import { createSelector } from '@reduxjs/toolkit';
+import { AsyncThunkAction, createSelector } from '@reduxjs/toolkit';
+
+import { AsyncThunkConfig } from '@reduxjs/toolkit/dist/createAsyncThunk';
 
 // Селекторы для данных из стора
 const selectFeedState = (state: any) => state.feeds;
@@ -39,3 +41,16 @@ export const FeedInfo: FC = () => {
     />
   );
 };
+function dispatch(
+  arg0: AsyncThunkAction<
+    { success: boolean } & {
+      orders: TOrder[];
+      total: number;
+      totalToday: number;
+    },
+    void,
+    AsyncThunkConfig
+  >
+) {
+  throw new Error('Function not implemented.');
+}
