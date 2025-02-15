@@ -9,15 +9,23 @@ import {
   ProfileOrders,
   Profile
 } from '../../pages';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+  useMatch
+} from 'react-router-dom';
 import { ProtectedRoute } from '../protected-route/protected-route';
 import '../../index.css';
 import styles from './app.module.css';
-import { useDispatch } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 import { useEffect } from 'react';
 import { AppHeader, OrderInfo, Modal, IngredientsDetails } from '@components';
 import { getIngredientsList } from '../../services/slices/ingredients';
 import { fetchFeeds } from '../../services/slices/feed';
+import { deleteCookie, getCookie } from '../../utils/cookie';
+import { getUserThunk } from '@slices';
 
 const App = () => {
   const location = useLocation();
@@ -25,6 +33,28 @@ const App = () => {
   const background = location.state?.background;
 
   const dispatch = useDispatch();
+
+  const profileMatch = useMatch('/profile/orders/:number')?.params.number;
+  const feedMatch = useMatch('/feed/:number')?.params.number;
+  const orderNumber = profileMatch || feedMatch;
+  const isAuthorized = useSelector((state) => state.user.isAuthorized); // Селектор для проверки авторизации
+
+  useEffect(() => {
+    const accessToken = getCookie('accessToken'); // Получаем accessToken из куки
+    const refreshToken = localStorage.getItem('refreshToken'); // Получаем refreshToken из localStorage
+
+    if (accessToken && refreshToken && !isAuthorized) {
+      // Если токены есть, но пользователь не авторизован, восстанавливаем состояние
+      dispatch(getUserThunk())
+        .unwrap()
+        .catch((err) => {
+          console.error('Failed to restore auth:', err);
+          // Если токен невалидный, очищаем данные
+          localStorage.removeItem('refreshToken');
+          deleteCookie('accessToken');
+        });
+    }
+  }, [dispatch, isAuthorized]);
 
   // Используем useEffect для запуска запросов
   useEffect(() => {
@@ -110,10 +140,8 @@ const App = () => {
           <Route
             path='/feed/:number'
             element={
-              <Modal
-                title={`#${location.state?.number}`}
-                onClose={() => navigate(-1)}
-              >
+              <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
+                {/*Используем orderNumber из параметров маршрута */}
                 <OrderInfo />
               </Modal>
             }
@@ -121,10 +149,8 @@ const App = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal
-                title={`#${location.state?.number}`}
-                onClose={() => navigate(-1)}
-              >
+              <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
+                {/*Используем orderNumber из параметров маршрута */}
                 <OrderInfo />
               </Modal>
             }
