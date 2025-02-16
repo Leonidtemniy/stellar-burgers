@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from '../../services/store';
 import { useParams } from 'react-router-dom';
 import { Preloader } from '../ui/preloader';
 import { IngredientDetailsUI } from '../ui/ingredient-details';
@@ -15,7 +15,7 @@ import { AppDispatch } from '../../services/store'; // Импортируйте 
 /** Компонент для отображения деталей ингредиента */
 export const IngredientsDetails: FC = () => {
   const { id } = useParams<{ id: string }>(); // Получаем id ингредиента из параметров маршрута
-  const dispatch = useDispatch<AppDispatch>(); // Типизируем dispatch
+  const dispatch = useDispatch(); // Типизируем dispatch
 
   // Получаем данные всех ингредиентов, флаг загрузки и ошибку из состояния Redux
   const allIngredients = useSelector(selectIngredients);

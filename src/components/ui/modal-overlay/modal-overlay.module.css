@@ -4,6 +4,6 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: rgb(0, 0, 0); /*убрал прозрачность 0.6*/
+  background-color: rgb(0, 0, 0, 0.7); /*Вернул прозрачность*/
   z-index: 7; /*поменял с 2 до 7*/
 }

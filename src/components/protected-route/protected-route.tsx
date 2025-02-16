@@ -41,8 +41,8 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
     return <Navigate to={location.state?.from?.pathname || '/'} />;
   }
 
-  // Для защищённых маршрутов
-  if (!isAuthorized && !onlyUnAuth) {
+  // Для защищённых маршрутов + Ждем загрузку статуса, не редиректим сразу
+  if (!isAuthorized && !isUserLoading) {
     return <Navigate to='/login' state={{ from: location }} />;
   }
 

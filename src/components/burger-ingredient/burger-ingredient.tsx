@@ -2,7 +2,7 @@
 
 import { FC, memo, useCallback } from 'react'; // memo и useCallback оптимизируют рендеринг
 import { useLocation } from 'react-router-dom'; // Для сохранения background state
-import { useDispatch } from 'react-redux'; // Использование хука из react-redux
+import { useDispatch } from '../../services/store';
 
 import { BurgerIngredientUI } from '@ui'; // UI-компонент для отображения ингредиента
 import { TBurgerIngredientProps } from './type'; // Типы для пропсов

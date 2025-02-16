@@ -1,7 +1,7 @@
 import { FC, memo } from 'react';
 import { BurgerConstructorElementUI } from '@ui'; // UI компонент
 import { BurgerConstructorElementProps } from './type';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from '../../services/store';
 import { removeIngredient, moveIngredient } from '@slices'; // Исправлено на moveIngredient
 
 export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(

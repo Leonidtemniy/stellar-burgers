@@ -38,6 +38,7 @@ const App = () => {
   const feedMatch = useMatch('/feed/:number')?.params.number;
   const orderNumber = profileMatch || feedMatch;
   const isAuthorized = useSelector((state) => state.user.isAuthorized); // Селектор для проверки авторизации
+  const isUserLoading = useSelector((state) => state.user.isLoading);
 
   useEffect(() => {
     const accessToken = getCookie('accessToken'); // Получаем accessToken из куки
@@ -146,15 +147,16 @@ const App = () => {
               </Modal>
             }
           />
-          <Route
-            path='/profile/orders/:number'
-            element={
-              <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
-                {/*Используем orderNumber из параметров маршрута */}
-                <OrderInfo />
-              </Modal>
-            }
-          />
+          {(isUserLoading || isAuthorized) && (
+            <Route
+              path='/profile/orders/:number'
+              element={
+                <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
+                  <OrderInfo />
+                </Modal>
+              }
+            />
+          )}
         </Routes>
       )}
     </div>

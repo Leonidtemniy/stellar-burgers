@@ -47,15 +47,20 @@ const constructorSlice = createSlice({
   name: 'burgerConstructor',
   initialState,
   reducers: {
-    // Добавление ингредиента
-    addIngredient: (state, action: PayloadAction<TIngredient>) => {
-      const id = nanoid();
-      const newIngredient: TConstructorIngredient = { ...action.payload, id };
+    // Добавление ингредиента с использованием prepare
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        const newIngredient = action.payload;
 
-      if (action.payload.type === 'bun') {
-        state.constructorItems.bun = newIngredient;
-      } else {
-        state.constructorItems.ingredients.push(newIngredient);
+        if (newIngredient.type === 'bun') {
+          state.constructorItems.bun = newIngredient;
+        } else {
+          state.constructorItems.ingredients.push(newIngredient);
+        }
+      },
+      prepare: (ingredient: TIngredient) => {
+        const id = nanoid(); // Генерация id на уровне prepare
+        return { payload: { ...ingredient, id } };
       }
     },
 
@@ -108,5 +113,5 @@ const constructorSlice = createSlice({
 export const { addIngredient, removeIngredient, moveIngredient, resetModal } =
   constructorSlice.actions;
 
-// Экспорт редюсера
+// Экспорт редьюсера
 export default constructorSlice.reducer;

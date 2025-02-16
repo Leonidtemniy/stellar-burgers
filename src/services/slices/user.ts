@@ -170,18 +170,3 @@ export const getRequestUser = (state: { user: UserState }) =>
 export const getUserSelector = (state: { user: UserState }) => state.user.user;
 
 export default userSlice.reducer;
-// function apiCallToRegister(userData: {
-//   email: string;
-//   name: string;
-//   password: string;
-// }) {
-//   throw new Error('Function not implemented.');
-// }
-
-// function registerSuccess(response: void): any {
-//   throw new Error('Function not implemented.');
-// }
-
-// function registerFailure(message: any): any {
-//   throw new Error('Function not implemented.');
-// }
