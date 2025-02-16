@@ -6,6 +6,7 @@ import {
 } from '@reduxjs/toolkit';
 import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
 import { orderBurgerApi } from '@api';
+import { useSelector } from '../store';
 
 // Тип состояния
 interface ConstructorState {

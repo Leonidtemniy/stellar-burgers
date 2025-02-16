@@ -37,12 +37,12 @@ const App = () => {
   const profileMatch = useMatch('/profile/orders/:number')?.params.number;
   const feedMatch = useMatch('/feed/:number')?.params.number;
   const orderNumber = profileMatch || feedMatch;
-  const isAuthorized = useSelector((state) => state.user.isAuthorized); // Селектор для проверки авторизации
-  const isUserLoading = useSelector((state) => state.user.isLoading);
+  const isAuthorized = useSelector((state) => state.user.isAuthorized);
+  const isUserLoading = useSelector((state) => state.user.isLoading); // Добавить состояние загрузки
 
   useEffect(() => {
-    const accessToken = getCookie('accessToken'); // Получаем accessToken из куки
-    const refreshToken = localStorage.getItem('refreshToken'); // Получаем refreshToken из localStorage
+    const accessToken = getCookie('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
 
     if (accessToken && refreshToken && !isAuthorized) {
       // Если токены есть, но пользователь не авторизован, восстанавливаем состояние
@@ -50,21 +50,23 @@ const App = () => {
         .unwrap()
         .catch((err) => {
           console.error('Failed to restore auth:', err);
-          // Если токен невалидный, очищаем данные
           localStorage.removeItem('refreshToken');
           deleteCookie('accessToken');
         });
     }
   }, [dispatch, isAuthorized]);
 
-  // Используем useEffect для запуска запросов
   useEffect(() => {
     // Загрузка ингредиентов
     dispatch(getIngredientsList());
-
     // Загрузка фида
     dispatch(fetchFeeds());
   }, [dispatch]);
+
+  // Пока идет загрузка состояния пользователя, не рендерим защищенные маршруты
+  if (isUserLoading) {
+    return <div>Loading...</div>; // Можно добавить лоадер
+  }
 
   return (
     <div className={styles.app}>
@@ -77,31 +79,10 @@ const App = () => {
         <Route path='/feed/:number' element={<OrderInfo />} />
         <Route path='/ingredients/:id' element={<IngredientsDetails />} />
         <Route path='*' element={<NotFound404 />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
         {/*Защищенные маршруты*/}
-        <Route
-          path='/login'
-          element={
-            <ProtectedRoute onlyUnAuth>
-              <Login />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/register'
-          element={
-            <ProtectedRoute onlyUnAuth>
-              <Register />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/forgot-password'
-          element={
-            <ProtectedRoute onlyUnAuth>
-              <ForgotPassword />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path='/reset-password'
           element={
@@ -142,21 +123,20 @@ const App = () => {
             path='/feed/:number'
             element={
               <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
-                {/*Используем orderNumber из параметров маршрута */}
                 <OrderInfo />
               </Modal>
             }
           />
-          {(isUserLoading || isAuthorized) && (
-            <Route
-              path='/profile/orders/:number'
-              element={
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
                 <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
                   <OrderInfo />
                 </Modal>
-              }
-            />
-          )}
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       )}
     </div>
@@ -164,6 +144,3 @@ const App = () => {
 };
 
 export default App;
-function apiGetUser(): any {
-  throw new Error('Function not implemented.');
-}

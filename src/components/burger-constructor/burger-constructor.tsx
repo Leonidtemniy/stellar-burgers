@@ -9,7 +9,7 @@ import { RootState } from '../../services/store';
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const isAuthorized = useSelector((state) => state.user.isAuthorized); // Селектор для проверки авторизации
   // Типизируем состояние через RootState
   const constructorItems = useSelector(
     (state: RootState) => state.burgerConstructor.constructorItems
@@ -40,7 +40,7 @@ export const BurgerConstructor: FC = () => {
   );
 
   const onOrderClick = () => {
-    if (constructorItems.bun) {
+    if (isAuthorized) {
       dispatch(sendOrder(ingredients));
     } else {
       navigate('/login');
