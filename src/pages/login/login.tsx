@@ -20,10 +20,10 @@ export const Login: FC = () => {
     dispatch(clearUserError());
   }, [dispatch]);
 
-  // Перенаправляем авторизованного пользователя
+  // Перенаправляем авторизованного пользователя на предыдущую страницу
   useEffect(() => {
     if (isAuthorized) {
-      const from = location.state?.from || { pathname: '/' }; // Перенаправляем на главную или на страницу, с которой пришел
+      const from = location.state?.from?.pathname || '/'; // Берем "откуда пришел" или '/' по умолчанию
       navigate(from, { replace: true });
     }
   }, [isAuthorized, navigate, location]);
@@ -31,7 +31,6 @@ export const Login: FC = () => {
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     dispatch(loginUserThunk({ email, password }));
-    navigate('/profile'); // Перенаправляем после успешного входа
   };
 
   return (

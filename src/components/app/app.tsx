@@ -38,14 +38,21 @@ const App = () => {
   const feedMatch = useMatch('/feed/:number')?.params.number;
   const orderNumber = profileMatch || feedMatch;
   const isAuthorized = useSelector((state) => state.user.isAuthorized);
-  const isUserLoading = useSelector((state) => state.user.isLoading); // Добавить состояние загрузки
+  const isUserLoading = useSelector((state) => state.user.isLoading);
 
+  // Перенаправление при обновлении страницы на /profile/orders/:number
+  useEffect(() => {
+    if (location.pathname.startsWith('/profile/orders/') && !background) {
+      navigate('/profile/orders', { replace: true });
+    }
+  }, [location, navigate, background]);
+
+  // Проверка авторизации пользователя
   useEffect(() => {
     const accessToken = getCookie('accessToken');
     const refreshToken = localStorage.getItem('refreshToken');
 
     if (accessToken && refreshToken && !isAuthorized) {
-      // Если токены есть, но пользователь не авторизован, восстанавливаем состояние
       dispatch(getUserThunk())
         .unwrap()
         .catch((err) => {
@@ -56,24 +63,29 @@ const App = () => {
     }
   }, [dispatch, isAuthorized]);
 
+  // Загрузка ингредиентов и фида
   useEffect(() => {
-    // Загрузка ингредиентов
     dispatch(getIngredientsList());
-    // Загрузка фида
     dispatch(fetchFeeds());
   }, [dispatch]);
 
-  // Пока идет загрузка состояния пользователя, не рендерим защищенные маршруты
+  // Закрытие модального окна и очистка localStorage
+  const closeOrderModal = () => {
+    localStorage.removeItem('lastOpenedOrder');
+    navigate(-1); // Возвращаемся на предыдущую страницу
+  };
+
+  // Отображение лоадера, пока идет загрузка состояния пользователя
   if (isUserLoading) {
-    return <div>Loading...</div>; // Можно добавить лоадер
+    return <div>Loading...</div>;
   }
 
   return (
     <div className={styles.app}>
       <AppHeader />
 
+      {/* Основные маршруты */}
       <Routes location={background || location}>
-        {/*Основные маршруты*/}
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
@@ -82,7 +94,6 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/forgot-password' element={<ForgotPassword />} />
-        {/*Защищенные маршруты*/}
         <Route
           path='/reset-password'
           element={
@@ -107,8 +118,10 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path='/profile/orders/:number' element={<OrderInfo />} />
       </Routes>
-      {/*Модальные окна*/}
+
+      {/* Модальные окна */}
       {background && (
         <Routes>
           <Route
@@ -131,7 +144,7 @@ const App = () => {
             path='/profile/orders/:number'
             element={
               <ProtectedRoute>
-                <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
+                <Modal title={`#${orderNumber}`} onClose={closeOrderModal}>
                   <OrderInfo />
                 </Modal>
               </ProtectedRoute>
