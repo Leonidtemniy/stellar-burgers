@@ -1,7 +1,8 @@
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { RegisterUI } from '@ui-pages';
-import { useDispatch } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 import { clearUserError, registerUserThunk } from '@slices';
+import { useNavigate } from 'react-router-dom';
 
 export const Register: FC = () => {
   const [userName, setUserName] = useState('');
@@ -9,21 +10,37 @@ export const Register: FC = () => {
   const [password, setPassword] = useState('');
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Получаем состояние ошибки из Redux
+  const error = useSelector((state) => state.user.error);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     const name = userName;
     console.log('Form submitted with:', { email, userName, password });
-    dispatch(registerUserThunk({ email, name, password }));
+    dispatch(registerUserThunk({ email, name, password }))
+      .unwrap()
+      .then(() => {
+        // Перенаправляем пользователя после успешной регистрации
+        navigate('/');
+      })
+      .catch((err) => {
+        console.error('Registration failed:', err);
+      });
   };
 
-  useEffect(() => {
-    dispatch(clearUserError());
-  });
+  // Очистка ошибки при размонтировании компонента
+  useEffect(
+    () => () => {
+      dispatch(clearUserError());
+    },
+    [dispatch]
+  );
 
   return (
     <RegisterUI
-      errorText=''
+      errorText={error || ''} // Передаем текст ошибки
       email={email}
       userName={userName}
       password={password}
