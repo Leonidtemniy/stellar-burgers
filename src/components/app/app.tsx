@@ -40,12 +40,15 @@ const App = () => {
   const isAuthorized = useSelector((state) => state.user.isAuthorized);
   const isUserLoading = useSelector((state) => state.user.isLoading);
 
-  // Перенаправление при обновлении страницы на /profile/orders/:number
+  // Восстановление страницы с деталями при перезагрузки
   useEffect(() => {
-    if (location.pathname.startsWith('/profile/orders/') && !background) {
-      navigate('/profile/orders', { replace: true });
+    const lastOpenedOrder = localStorage.getItem('lastOpenedOrder');
+    if (lastOpenedOrder) {
+      navigate(`/profile/orders/${lastOpenedOrder}`, {
+        state: { background: location }
+      });
     }
-  }, [location, navigate, background]);
+  }, [navigate, location]);
 
   // Проверка авторизации пользователя
   useEffect(() => {
@@ -118,7 +121,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path='/profile/orders/:number' element={<OrderInfo />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
       {/* Модальные окна */}
