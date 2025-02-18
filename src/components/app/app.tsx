@@ -20,7 +20,7 @@ import { ProtectedRoute } from '../protected-route/protected-route';
 import '../../index.css';
 import styles from './app.module.css';
 import { useDispatch, useSelector } from '../../services/store';
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { AppHeader, OrderInfo, Modal, IngredientsDetails } from '@components';
 import { getIngredientsList } from '../../services/slices/ingredients';
 import { fetchFeeds } from '../../services/slices/feed';
@@ -30,27 +30,26 @@ import { getUserThunk } from '@slices';
 const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const background = location.state?.background;
-
   const dispatch = useDispatch();
 
+  // Получаем номер заказа из URL
   const profileMatch = useMatch('/profile/orders/:number')?.params.number;
   const feedMatch = useMatch('/feed/:number')?.params.number;
-  const orderNumber = profileMatch || feedMatch;
+  const orderNumber = useMemo(
+    () => profileMatch || feedMatch,
+    [profileMatch, feedMatch]
+  );
+
+  // Проверяем авторизацию пользователя
   const isAuthorized = useSelector((state) => state.user.isAuthorized);
   const isUserLoading = useSelector((state) => state.user.isLoading);
 
-  // Восстановление страницы с деталями при перезагрузки
-  useEffect(() => {
-    const lastOpenedOrder = localStorage.getItem('lastOpenedOrder');
-    if (lastOpenedOrder) {
-      navigate(`/profile/orders/${lastOpenedOrder}`, {
-        state: { background: location }
-      });
-    }
-  }, [navigate, location]);
+  // Ждем загрузку данных о пользователе перед рендерингом
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
-  // Проверка авторизации пользователя
+  // Восстанавливаем background из истории
+  const background = location.state?.background || null;
+
   useEffect(() => {
     const accessToken = getCookie('accessToken');
     const refreshToken = localStorage.getItem('refreshToken');
@@ -58,15 +57,29 @@ const App = () => {
     if (accessToken && refreshToken && !isAuthorized) {
       dispatch(getUserThunk())
         .unwrap()
-        .catch((err) => {
-          console.error('Failed to restore auth:', err);
+        .catch(() => {
           localStorage.removeItem('refreshToken');
           deleteCookie('accessToken');
-        });
+        })
+        .finally(() => setIsAuthChecked(true));
+    } else {
+      setIsAuthChecked(true);
     }
   }, [dispatch, isAuthorized]);
 
-  // Загрузка ингредиентов и фида
+  // Восстанавливаем background после перезагрузки
+  useEffect(() => {
+    const lastOpenedOrder = localStorage.getItem('lastOpenedOrder');
+    const backgroundPath = localStorage.getItem('backgroundPath');
+
+    if (lastOpenedOrder && backgroundPath && location.pathname === '/') {
+      navigate(`/profile/orders/${lastOpenedOrder}`, {
+        state: { background: { pathname: backgroundPath } }
+      });
+    }
+  }, [navigate, location.pathname]);
+
+  // Загружаем ингредиенты и заказы
   useEffect(() => {
     dispatch(getIngredientsList());
     dispatch(fetchFeeds());
@@ -75,11 +88,17 @@ const App = () => {
   // Закрытие модального окна и очистка localStorage
   const closeOrderModal = () => {
     localStorage.removeItem('lastOpenedOrder');
-    navigate(-1); // Возвращаемся на предыдущую страницу
+    localStorage.removeItem('backgroundPath');
+
+    if (background) {
+      navigate(background.pathname, { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
   };
 
-  // Отображение лоадера, пока идет загрузка состояния пользователя
-  if (isUserLoading) {
+  // Пока идет проверка авторизации — показываем лоадер
+  if (!isAuthChecked || isUserLoading) {
     return <div>Loading...</div>;
   }
 
@@ -145,7 +164,7 @@ const App = () => {
           <Route
             path='/feed/:number'
             element={
-              <Modal title={`#${orderNumber}`} onClose={() => navigate(-1)}>
+              <Modal title={`#${orderNumber}`} onClose={closeOrderModal}>
                 <OrderInfo />
               </Modal>
             }

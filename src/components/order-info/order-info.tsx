@@ -12,49 +12,38 @@ export const OrderInfo: FC = () => {
   const dispatch = useDispatch();
 
   // Данные из Redux
-  const {
-    currentOrder: orderData,
-    isLoading,
-    errorMessage
-  } = useSelector(selectOrderState);
+  const { currentOrder, isLoading, errorMessage } =
+    useSelector(selectOrderState);
   const ingredients: TIngredient[] = useSelector(
     (state) => state.ingredients.ingredients
   );
 
-  // Загружаем данные заказа
+  // Загружаем данные заказа (если оно отсутствует)
   useEffect(() => {
-    if (orderNumber && !orderData) {
+    if (orderNumber && (!currentOrder || currentOrder.number !== orderNumber)) {
       dispatch(fetchOneOrder(orderNumber));
     }
-  }, [dispatch, orderNumber, orderData]);
+  }, [dispatch, orderNumber, currentOrder]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+    if (!currentOrder || !ingredients.length) return null;
 
-    const date = new Date(orderData.createdAt);
+    const date = new Date(currentOrder.createdAt);
 
-    type TIngredientsWithCount = {
-      [key: string]: TIngredient & { count: number };
-    };
-
-    const ingredientsInfo = orderData.ingredients.reduce(
-      (acc: TIngredientsWithCount, item) => {
-        if (!acc[item]) {
-          const ingredient = ingredients.find((ing) => ing._id === item);
-          if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
+    const ingredientsInfo = currentOrder.ingredients.reduce(
+      (acc, id) => {
+        const ingredient = ingredients.find((ing) => ing._id === id);
+        if (ingredient) {
+          if (!acc[id]) {
+            acc[id] = { ...ingredient, count: 1 };
+          } else {
+            acc[id].count++;
           }
-        } else {
-          acc[item].count++;
         }
-
         return acc;
       },
-      {}
+      {} as { [key: string]: TIngredient & { count: number } }
     );
 
     const total = Object.values(ingredientsInfo).reduce(
@@ -63,12 +52,12 @@ export const OrderInfo: FC = () => {
     );
 
     return {
-      ...orderData,
+      ...currentOrder,
       ingredientsInfo,
       date,
       total
     };
-  }, [orderData, ingredients]);
+  }, [currentOrder, ingredients]);
 
   if (isLoading) {
     return <Preloader />;
