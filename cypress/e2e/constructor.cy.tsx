@@ -75,6 +75,14 @@ describe('проверяем страницу конструктора бург�
       // Закрытие модального окна
       cy.get(SELECTORS.MODAL_OVERLAY).click(10, 10, { force: true }); // Клик в координаты (10, 10)
       cy.get(SELECTORS.MODAL).should('not.exist');
+
+      // Проверка, что конструктор пуст
+      cy.get(SELECTORS.CONSTRUCTOR_BUN)
+        .contains('Выберите булки')
+        .should('exist'); // Проверка, что булка отсутствует
+      cy.get(SELECTORS.CONSTRUCTOR_INGREDIENT)
+        .contains('Выберите начинку') // проверка начинки
+        .should('exist');
     });
   });
 });
