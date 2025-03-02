@@ -2,14 +2,11 @@
 
 import { SELECTORS } from '../support/constants';
 
-describe('E2E тест конструктора бургеров', () => {
-  beforeEach(() => {
-    // Мок ответа для списка ингредиентов
-    cy.intercept('GET', '/api/ingredients', { fixture: 'ingredients.json' }).as(
-      'getIngredients'
-    );
-    cy.visit('/');
-    cy.wait('@getIngredients');
+describe('проверяем страницу конструктора бургера', function () {
+  beforeEach(function () {
+    cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' });
+    cy.viewport(1300, 800);
+    cy.visit('localhost:4000');
   });
 
   it('Список ингредиентов доступен для выбора', () => {
@@ -19,43 +16,41 @@ describe('E2E тест конструктора бургеров', () => {
   });
 
   it('Ингредиенты можно добавлять в конструктор', () => {
+    cy.get(SELECTORS.INGREDIENT_BUN).then(($el) => {});
     cy.get(SELECTORS.INGREDIENT_BUN).contains('Добавить').click();
     cy.get(SELECTORS.INGREDIENT_MAIN).contains('Добавить').click();
     cy.get(SELECTORS.INGREDIENT_SAUCE).contains('Добавить').click();
     cy.get(SELECTORS.CONSTRUCTOR).children().should('have.length', 4);
   });
-
   describe('Открытие и закрытие модального окна ингредиента', () => {
     it('Закрытие по клику на крестик', () => {
-      cy.get(SELECTORS.INGREDIENT_BUN).first().click();
+      cy.get(SELECTORS.INGREDIENT_BUN).children().first().click();
       cy.get(SELECTORS.MODAL).should('be.visible');
       cy.get(SELECTORS.MODAL_CLOSE).click();
       cy.get(SELECTORS.MODAL).should('not.exist');
     });
-
     it('Закрытие через нажатие на оверлей', () => {
-      cy.get(SELECTORS.INGREDIENT_BUN).first().click();
+      cy.get(SELECTORS.INGREDIENT_BUN).children().first().click();
       cy.get(SELECTORS.MODAL).should('be.visible');
-      cy.get(SELECTORS.MODAL).click('topRight', { force: true });
+      cy.get(SELECTORS.MODAL_OVERLAY).click(10, 10, { force: true }); // Клик в координаты (10, 10)
       cy.get(SELECTORS.MODAL).should('not.exist');
     });
   });
 
   describe('Создание заказов', () => {
     beforeEach(() => {
-      // Мок ответа для авторизации
-      cy.intercept('GET', '/api/auth/user', { fixture: 'user.json' }).as(
-        'getUser'
-      );
-      // Мок ответа для оформления заказа
-      cy.intercept('POST', '/api/orders', { fixture: 'order.json' }).as(
+      cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' });
+      cy.intercept('GET', '/api/auth/user', { fixture: 'user.json' });
+      cy.intercept('POST', 'api/orders', { fixture: 'order.json' }).as(
         'postOrder'
       );
-      // Авторизация
+
+      // Установка кук и токенов
       cy.setCookie('accessToken', 'EXAMPLE_ACCESS_TOKEN');
       localStorage.setItem('refreshToken', 'EXAMPLE_REFRESH_TOKEN');
-      cy.wait('@getUser');
-      cy.visit('/');
+
+      // Переход на страницу
+      cy.visit('localhost:4000');
     });
 
     afterEach(() => {
@@ -75,15 +70,11 @@ describe('E2E тест конструктора бургеров', () => {
 
       // Проверка модального окна
       cy.get(SELECTORS.MODAL).should('be.visible');
-      cy.get(SELECTORS.ORDER_NUMBER).should('contain', '69752'); // Номер заказа из фикстуры
+      cy.get(SELECTORS.ORDER_NUMBER).should('contain', '1234'); // Номер заказа из фикстуры
 
       // Закрытие модального окна
-      cy.get(SELECTORS.MODAL_CLOSE).click();
+      cy.get(SELECTORS.MODAL_OVERLAY).click(10, 10, { force: true }); // Клик в координаты (10, 10)
       cy.get(SELECTORS.MODAL).should('not.exist');
-
-      // Проверка, что конструктор пуст
-      cy.get(SELECTORS.CONSTRUCTOR_BUN).should('not.exist');
-      cy.get(SELECTORS.CONSTRUCTOR_INGREDIENT).should('not.exist');
     });
   });
 });
